@@ -48,6 +48,8 @@ final class CoreKitConfigurator: CoreKitConfiguring {
     configureModelManager()
     configureProfile()
     configureWebDialogView()
+    configureDomainHandler()
+    configureGraphRequestQueue()
   }
 }
 
@@ -108,7 +110,10 @@ private extension CoreKitConfigurator {
       internalUtility: components.internalUtility,
       capiReporter: components.capiReporter,
       protectedModeManager: components.protectedModeManager,
-      macaRuleMatchingManager: components.macaRuleMatchingManager
+      macaRuleMatchingManager: components.macaRuleMatchingManager,
+      blocklistEventsManager: components.blocklistEventsManager,
+      redactedEventsManager: components.redactedEventsManager,
+      sensitiveParamsManager: components.sensitiveParamsManager
     )
   }
 
@@ -128,7 +133,9 @@ private extension CoreKitConfigurator {
   func configureAppEventsState() {
     _AppEventsState.eventProcessors = [
       components.eventDeactivationManager,
+      components.blocklistEventsManager,
       components.restrictiveDataFilterManager,
+      components.redactedEventsManager,
     ]
   }
 
@@ -335,6 +342,7 @@ private extension CoreKitConfigurator {
     Settings.shared.setDependencies(
       .init(
         appEventsConfigurationProvider: components.appEventsConfigurationProvider,
+        serverConfigurationProvider: components.serverConfigurationProvider,
         dataStore: components.defaultDataStore,
         eventLogger: components.eventLogger,
         infoDictionaryProvider: components.infoDictionaryProvider
@@ -360,6 +368,25 @@ private extension CoreKitConfigurator {
       webViewProvider: components.webViewProvider,
       urlOpener: components.internalURLOpener,
       errorFactory: components.errorFactory
+    )
+  }
+
+  func configureDomainHandler() {
+    components.internalUtility.validateDomainConfiguration()
+
+    _DomainHandler.sharedInstance().configure(
+      domainConfigurationProvider: _DomainConfigurationManager.sharedInstance(),
+      settings: components.settings,
+      dataStore: components.defaultDataStore,
+      graphRequestFactory: components.graphRequestFactory,
+      graphRequestConnectionFactory: components.graphRequestConnectionFactory
+    )
+    _DomainConfiguration.setDefaultDomainInfo()
+  }
+
+  func configureGraphRequestQueue() {
+    GraphRequestQueue.sharedInstance().configure(
+      graphRequestConnectionFactory: components.graphRequestConnectionFactory
     )
   }
 }

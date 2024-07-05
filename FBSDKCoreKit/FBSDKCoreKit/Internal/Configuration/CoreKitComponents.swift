@@ -84,6 +84,9 @@ final class CoreKitComponents {
   let aemManager: _AutoSetup
   let protectedModeManager: _AppEventsParameterProcessing
   let macaRuleMatchingManager: MACARuleMatching
+  let blocklistEventsManager: _EventsProcessing
+  let redactedEventsManager: _EventsProcessing
+  let sensitiveParamsManager: _AppEventsParameterProcessing
 
   // MARK: - Initializers
 
@@ -160,7 +163,10 @@ final class CoreKitComponents {
     webViewProvider: _WebViewProviding,
     aemManager: _AutoSetup,
     protectedModeManager: _AppEventsParameterProcessing,
-    macaRuleMatchingManager: MACARuleMatching
+    macaRuleMatchingManager: MACARuleMatching,
+    blocklistEventsManager: _EventsProcessing,
+    redactedEventsManager: _EventsProcessing,
+    sensitiveParamsManager: _AppEventsParameterProcessing
   ) {
     self.accessTokenExpirer = accessTokenExpirer
     self.accessTokenWallet = accessTokenWallet
@@ -235,6 +241,9 @@ final class CoreKitComponents {
     self.aemManager = aemManager
     self.protectedModeManager = protectedModeManager
     self.macaRuleMatchingManager = macaRuleMatchingManager
+    self.blocklistEventsManager = blocklistEventsManager
+    self.redactedEventsManager = redactedEventsManager
+    self.sensitiveParamsManager = sensitiveParamsManager
   }
 
   // MARK: - Default components
@@ -340,6 +349,9 @@ final class CoreKitComponents {
     let urlSessionProxyFactory: _URLSessionProxyProviding = _URLSessionProxyFactory()
     let protectedModeManager: _AppEventsParameterProcessing = ProtectedModeManager()
     let macaRuleMatchingManager: MACARuleMatching = MACARuleMatchingManager()
+    let blocklistEventsManager: _EventsProcessing = BlocklistEventsManager()
+    let redactedEventsManager: _EventsProcessing = RedactedEventsManager()
+    let sensitiveParamsManager: _AppEventsParameterProcessing = SensitiveParamsManager()
 
     var aemNetworker: AEMNetworking?
     if #available(iOS 14, *) {
@@ -445,7 +457,10 @@ final class CoreKitComponents {
       webViewProvider: _WebViewFactory(),
       aemManager: _AEMManager.shared,
       protectedModeManager: protectedModeManager,
-      macaRuleMatchingManager: macaRuleMatchingManager
+      macaRuleMatchingManager: macaRuleMatchingManager,
+      blocklistEventsManager: blocklistEventsManager,
+      redactedEventsManager: redactedEventsManager,
+      sensitiveParamsManager: sensitiveParamsManager
     )
   }()
 }

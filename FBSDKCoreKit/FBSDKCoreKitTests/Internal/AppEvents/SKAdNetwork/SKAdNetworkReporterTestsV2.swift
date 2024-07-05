@@ -277,11 +277,9 @@ final class SKAdNetworkReporterTestsV2: XCTestCase {
     XCTAssertFalse(skAdNetworkReporter.shouldCutoff())
 
     // Case 2: timestamp is already expired
-    let calendar = Calendar(identifier: .gregorian)
-    var addComponents = DateComponents()
-    addComponents.day = -2
+    let secondsInPast = 2 * 24 * 60 * 60
+    let expiredDate = Date().addingTimeInterval(-TimeInterval(secondsInPast))
 
-    let expiredDate = calendar.date(byAdding: addComponents, to: Date())
     userDefaultsSpy.set(
       expiredDate,
       forKey: "com.facebook.sdk:FBSDKSettingsInstallTimestamp"
@@ -322,11 +320,8 @@ final class SKAdNetworkReporterTestsV2: XCTestCase {
   func testUpdateConversionValueWhenShouldCutoff() {
     skAdNetworkReporter.configuration = defaultConfiguration
     // For v4, fine conversion value will not be updated for 2nd and 3rd postbacks
-    let calendar = Calendar(identifier: .gregorian)
-    var addComponents = DateComponents()
-    addComponents.day = -4
-
-    let expiredDate = calendar.date(byAdding: addComponents, to: Date())
+    let secondsInPast = 4 * 24 * 60 * 60
+    let expiredDate = Date().addingTimeInterval(-TimeInterval(secondsInPast))
     userDefaultsSpy.set(
       expiredDate,
       forKey: "com.facebook.sdk:FBSDKSettingsInstallTimestamp"
@@ -354,11 +349,9 @@ final class SKAdNetworkReporterTestsV2: XCTestCase {
   func testUpdateCoarseConversionValueWhenShouldNotCutoff() {
     skAdNetworkReporter.configuration = defaultConfiguration
     // For v4, coarse conversion value will be updated for all postback windows
-    let calendar = Calendar(identifier: .gregorian)
-    var addComponents = DateComponents()
-    addComponents.day = -20
+    let secondsInPast = 20 * 24 * 60 * 60
+    let expiredDate = Date().addingTimeInterval(-TimeInterval(secondsInPast))
 
-    let expiredDate = calendar.date(byAdding: addComponents, to: Date())
     userDefaultsSpy.set(
       expiredDate,
       forKey: "com.facebook.sdk:FBSDKSettingsInstallTimestamp"
@@ -452,15 +445,11 @@ final class SKAdNetworkReporterTestsV2: XCTestCase {
   }
 
   func testGetCurrentPostbackWindow() {
-    // 1st postback window, 0-2 days
-    var addComponents = DateComponents()
-    addComponents.day = -1
-    addComponents.hour = -23
-    addComponents.minute = -59
-    addComponents.second = -59
+    let currentDate = Date()
 
-    let calendar = Calendar(identifier: .gregorian)
-    var expiredDate = calendar.date(byAdding: addComponents, to: Date())
+    // 1st postback window, 0-2 days
+    var secondsInPast = 2 * 24 * 60 * 60 - 1
+    var expiredDate = currentDate.addingTimeInterval(-TimeInterval(secondsInPast))
     userDefaultsSpy.set(
       expiredDate,
       forKey: "com.facebook.sdk:FBSDKSettingsInstallTimestamp"
@@ -471,11 +460,8 @@ final class SKAdNetworkReporterTestsV2: XCTestCase {
     )
 
     // 2nd postback window, 3-7 days
-    addComponents.day = -6
-    addComponents.hour = -23
-    addComponents.minute = -59
-    addComponents.second = -59
-    expiredDate = calendar.date(byAdding: addComponents, to: Date())
+    secondsInPast = 7 * 24 * 60 * 60 - 1
+    expiredDate = currentDate.addingTimeInterval(-TimeInterval(secondsInPast))
     userDefaultsSpy.set(
       expiredDate,
       forKey: "com.facebook.sdk:FBSDKSettingsInstallTimestamp"
@@ -486,11 +472,8 @@ final class SKAdNetworkReporterTestsV2: XCTestCase {
     )
 
     // 3rd postback window, 8-35 days
-    addComponents.day = -34
-    addComponents.hour = -23
-    addComponents.minute = -59
-    addComponents.second = -59
-    expiredDate = calendar.date(byAdding: addComponents, to: Date())
+    secondsInPast = 35 * 24 * 60 * 60 - 1
+    expiredDate = currentDate.addingTimeInterval(-TimeInterval(secondsInPast))
     userDefaultsSpy.set(
       expiredDate,
       forKey: "com.facebook.sdk:FBSDKSettingsInstallTimestamp"
