@@ -395,6 +395,10 @@ public final class ApplicationDelegate: NSObject {
     applicationObservers.allObjects.forEach { observer in
       observer.applicationDidEnterBackground?(notification.object as? UIApplication)
     }
+    IAPTransactionCache.shared.trimIfNeeded()
+    if IAPDedupeProcessor.shared.isEnabled {
+      IAPDedupeProcessor.shared.saveNonProcessedEvents()
+    }
   }
 
   func applicationDidBecomeActive(_ notification: Notification?) {
@@ -413,6 +417,11 @@ public final class ApplicationDelegate: NSObject {
 
     applicationObservers.allObjects.forEach { observer in
       observer.applicationDidBecomeActive?(notification?.object as? UIApplication)
+    }
+    if #available(iOS 15.0, *) {
+      Task {
+        await IAPTransactionObserver.shared.observeNewTransactions()
+      }
     }
   }
 

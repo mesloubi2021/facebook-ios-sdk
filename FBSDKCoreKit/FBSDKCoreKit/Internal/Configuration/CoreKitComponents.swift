@@ -83,10 +83,15 @@ final class CoreKitComponents {
   let webViewProvider: _WebViewProviding
   let aemManager: _AutoSetup
   let protectedModeManager: _AppEventsParameterProcessing
+  let bannedParamsManager: MACARuleMatching
+  let stdParamEnforcementManager: MACARuleMatching
   let macaRuleMatchingManager: MACARuleMatching
   let blocklistEventsManager: _EventsProcessing
   let redactedEventsManager: _EventsProcessing
   let sensitiveParamsManager: _AppEventsParameterProcessing
+  let transactionObserver: _TransactionObserving
+  let iapDedupeProcessor: _IAPDedupeProcessing
+  let iapTransactionCache: _IAPTransactionCaching
 
   // MARK: - Initializers
 
@@ -163,10 +168,15 @@ final class CoreKitComponents {
     webViewProvider: _WebViewProviding,
     aemManager: _AutoSetup,
     protectedModeManager: _AppEventsParameterProcessing,
+    bannedParamsManager: MACARuleMatching,
+    stdParamEnforcementManager: MACARuleMatching,
     macaRuleMatchingManager: MACARuleMatching,
     blocklistEventsManager: _EventsProcessing,
     redactedEventsManager: _EventsProcessing,
-    sensitiveParamsManager: _AppEventsParameterProcessing
+    sensitiveParamsManager: _AppEventsParameterProcessing,
+    transactionObserver: _TransactionObserving,
+    iapDedupeProcessor: _IAPDedupeProcessing,
+    iapTransactionCache: _IAPTransactionCaching
   ) {
     self.accessTokenExpirer = accessTokenExpirer
     self.accessTokenWallet = accessTokenWallet
@@ -240,10 +250,15 @@ final class CoreKitComponents {
     self.webViewProvider = webViewProvider
     self.aemManager = aemManager
     self.protectedModeManager = protectedModeManager
+    self.bannedParamsManager = bannedParamsManager
+    self.stdParamEnforcementManager = stdParamEnforcementManager
     self.macaRuleMatchingManager = macaRuleMatchingManager
     self.blocklistEventsManager = blocklistEventsManager
     self.redactedEventsManager = redactedEventsManager
     self.sensitiveParamsManager = sensitiveParamsManager
+    self.transactionObserver = transactionObserver
+    self.iapDedupeProcessor = iapDedupeProcessor
+    self.iapTransactionCache = iapTransactionCache
   }
 
   // MARK: - Default components
@@ -348,10 +363,19 @@ final class CoreKitComponents {
     let settings: SettingsProtocol & SettingsLogging = Settings.shared
     let urlSessionProxyFactory: _URLSessionProxyProviding = _URLSessionProxyFactory()
     let protectedModeManager: _AppEventsParameterProcessing = ProtectedModeManager()
+    let stdParamEnforcementManager: MACARuleMatching = StdParamEnforcementManager()
+    let bannedParamsManager: MACARuleMatching = BannedParamsManager()
     let macaRuleMatchingManager: MACARuleMatching = MACARuleMatchingManager()
     let blocklistEventsManager: _EventsProcessing = BlocklistEventsManager()
     let redactedEventsManager: _EventsProcessing = RedactedEventsManager()
     let sensitiveParamsManager: _AppEventsParameterProcessing = SensitiveParamsManager()
+    IAPTransactionObserver.shared.setDependencies(
+      .init(
+        iapTransactionLoggingFactory: IAPTransactionLoggingFactory(),
+        paymentQueue: SKPaymentQueue.default(),
+        appEventsConfigurationProvider: appEventsConfigurationProvider
+      )
+    )
 
     var aemNetworker: AEMNetworking?
     if #available(iOS 14, *) {
@@ -457,10 +481,15 @@ final class CoreKitComponents {
       webViewProvider: _WebViewFactory(),
       aemManager: _AEMManager.shared,
       protectedModeManager: protectedModeManager,
+      bannedParamsManager: bannedParamsManager,
+      stdParamEnforcementManager: stdParamEnforcementManager,
       macaRuleMatchingManager: macaRuleMatchingManager,
       blocklistEventsManager: blocklistEventsManager,
       redactedEventsManager: redactedEventsManager,
-      sensitiveParamsManager: sensitiveParamsManager
+      sensitiveParamsManager: sensitiveParamsManager,
+      transactionObserver: IAPTransactionObserver.shared,
+      iapDedupeProcessor: IAPDedupeProcessor.shared,
+      iapTransactionCache: IAPTransactionCache.shared
     )
   }()
 }
